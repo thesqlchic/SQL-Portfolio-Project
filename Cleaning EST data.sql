@@ -4,8 +4,8 @@ SELECT *
 FROM Quarter_4_Data;
 
 /*Removing extra and unwanted columns
-This columns are completely null and have no data
-They were added into the table during data importation into the database.
+These columns are completely null and have no data
+They were added to the table during data importation into the database.
 The ALTER and DROP Statement will be used to achieve this*/
 ALTER TABLE
 	Quarter_4_Data
@@ -36,7 +36,7 @@ WHERE
 	[Full Name] IS NULL
 
 -- SECOND NULL SOLUTION
---FIXING NULL IN AIESEC MAIL COLUMN
+--FIXING NULL IN AIESEC MAIL COLUMN USING COALESCE 
 SELECT
 	[Full Name], [Email Address], [AIESEC Mail],
 	COALESCE([AIESEC Mail], [Email Address], null) AS NEW_AIESEC_MAIL
@@ -45,7 +45,7 @@ FROM
 WHERE
 	[AIESEC Mail] IS NULL;
 
---Inputing the new information gotten into the table using the update statement
+--Inputting the new information gotten into the table using the update statement
 UPDATE
 	Quarter_4_Data
 SET 
@@ -54,6 +54,7 @@ WHERE
 	[AIESEC Mail] IS NULL;
 
 --Consistency in strings
+--Changing all strings in the AIESEC mail column to lowercase
 SELECT
 	[AIESEC Mail],
 	LOWER([AIESEC Mail])
@@ -66,8 +67,10 @@ UPDATE
 SET 
 	[AIESEC Mail] = LOWER([AIESEC Mail]);
 
---Changing Qualitative data to Quantitative data for proper analysis
-SELECT --DISTINCT
+--Changing Qualitative data to Quantitative data based on certain criteria for proper analysis
+ /*(DISTINCT statement was used to check the unique values in the quarter rating column
+	 and confirm if the criteria of each value were executed)*/	
+SELECT DISTINCT
 	[Quarter Rating],
 	CASE WHEN [Quarter Rating] = 'Excellent' THEN 5
 	WHEN [Quarter Rating] = 'Very Good' THEN 4
@@ -79,7 +82,8 @@ SELECT --DISTINCT
 FROM
 	Quarter_4_Data;
 
---Updating the Quarter 4 Table with the rating
+--Updating the Quarter 4 Table with the criteria rating
+--The distinct statement should not be included
 UPDATE 
 	Quarter_4_Data
 SET
@@ -92,9 +96,9 @@ SET
 	ELSE ''
 	END;
 
---Checking for duplicate records using Window functions:CTE and Row Number.
+--Checking for duplicate records using Window functions: CTE and Row Number.
 WITH Duplicatecte AS(
-SELECT [Full Name], [AIESEC Mail],LC, [Functional Area],
+SELECT [Full Name], [AIESEC Mail], LC, [Functional Area],
 	ROW_NUMBER() OVER(PARTITION BY [Full Name], [AIESEC MAIL] ORDER BY LC) AS Duplicate_Checker
 FROM	
 	Quarter_4_Data)
